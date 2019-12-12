@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
-import calculateWinner from './calculateWinner';
+import calculateWinner from './utils/calculateWinner';
+import getLocation from './utils/getLocation';
 import Board from './components/board';
 
 class Game extends React.Component {
@@ -8,7 +9,10 @@ class Game extends React.Component {
     super(props);
     this.state = {
       history: [
-        {squares: Array(9).fill(null)},
+        {
+          squares: Array(9).fill(null),
+          positions: Array(9).fill(null),
+        },
       ],
       stepNumber: 0,
       xIsNext: true,
@@ -16,16 +20,20 @@ class Game extends React.Component {
   }
 
   handleClick = i => {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const stepNumber = this.state.stepNumber;
+    const history = this.state.history.slice(0, stepNumber + 1);
     const current = history[history.length - 1];
     let squares = [...current.squares];
+    let positions = [...current.positions];
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
+    positions[stepNumber] = getLocation(i);
     this.setState({
       history: history.concat([{
         squares: squares,
+        positions: positions,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -44,11 +52,14 @@ class Game extends React.Component {
     const stepNumber = this.state.stepNumber;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const positions = current.positions;
 
     const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move:
-        'Go to game start';
+      const position = positions[move -1];
+      let desc = 'Go to game start';
+      if (position !== undefined && position !== null) {
+        desc = `Go to move # ${move} Row: ${position.row} Col: ${position.col}`;
+      }
       return (
         <li>
           <button onClick={() => this.jumpTo(move)}>
@@ -78,7 +89,6 @@ class Game extends React.Component {
     );
   }
 }
-
 
 function App() {
   return (
