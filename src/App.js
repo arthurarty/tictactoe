@@ -61,7 +61,7 @@ class Game extends React.Component {
         desc = `Go to move # ${move} Row: ${position.row} Col: ${position.col}`;
       }
       return (
-        <li>
+        <li key={move.toString()}>
           <button onClick={() => this.jumpTo(move)}>
             {desc}
           </button>
